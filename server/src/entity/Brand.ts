@@ -7,14 +7,9 @@ export class Brand extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ default: 0 })
-    sum: number;
+    @Column({ unique: true })
+    name!: string;
 
-    @Column()
-    date: string;
-
-    @Column({ default: false })
-    isDone: boolean;
 
     @OneToMany(type => Phone, phone => phone.brand)
     phones: Phone[];

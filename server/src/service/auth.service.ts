@@ -3,8 +3,9 @@ import * as bcrypt from "bcrypt"
 import { getRepository } from "typeorm"
 import { User } from "../entity/User"
 import generateJwt from "../utils/generateJwt"
-import { IUserProfile } from "../interface/auth"
+import { IUserProfile } from "../interface/auth.interface"
 import ApiError from "../utils/exceptions"
+import * as jwt from "jsonwebtoken"
 
 class AuthService {
     async registration(body: IUserProfile) {
@@ -12,7 +13,6 @@ class AuthService {
             const { email, password, role } = body
             const userRepository = getRepository(User)
             const candidate = await userRepository.findOne({ email })
-            console.log(candidate)
             if (candidate) {
                 throw ApiError.ClientError("Пользователь с таким email уже существует")
             }
@@ -41,10 +41,18 @@ class AuthService {
             const token = generateJwt(user.id, user.email, user.role)
             return { token }
         } catch (error) {
-            throw Error(error.message)
+            throw ApiError.Forbidden(error.message)
         }
     }
-
+    async getProfileInfo(token: string) {
+        try {
+            const decoded = jwt.verify(token, process.env.SECRET_KEY)
+            return decoded
+        } catch (error) {
+            console.log(error)
+            throw ApiError.Forbidden("Ошибка при получении роли")
+        }
+    }
 }
 
 export default new AuthService()

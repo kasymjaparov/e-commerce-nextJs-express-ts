@@ -21,4 +21,5 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Basket, basket => basket.user)
   public phones_users: Basket[];
+
 }
